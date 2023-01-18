@@ -18,10 +18,11 @@
 </head>
 
 <body>
-
+<?php require_once('index.php'); ?>
     <div class="container">
         <div class="row">
-            <table class="table">
+            <h1 class="my-5" style="text-align: center">User Record</h1>
+            <table class="table my-2">
                 <tr>
                     <th>#</th>
                     <th>Title</th>
@@ -42,7 +43,7 @@
             </table>
         </div>
 
-        <!-- Modal Login-->
+        <!-- Modal Edit-->
         <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -53,7 +54,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form method="post" name="form_edit" id="form_edit">
+                        <form name="update_form" id="update_form">
                             <div class="form-row">
                                 <div class="form-group col-md-2">
                                     <label class="my-1 mr-2" for="title">Title</label>
@@ -69,6 +70,7 @@
                                     <label for="first_name">First Name</label>
                                     <input type="text" class="form-control" id="first_name" name="first_name" required
                                         placeholder="e.g. Samreen">
+                                    <input type="text" id="edit-id" name="id" hidden="">
                                 </div>
                                 <div class="form-group col-md-5">
                                     <label for="last_name">Last Name</label>
@@ -141,7 +143,10 @@
                             <div style="align-items: right;">
                                 <a type="button" class="btn btn-secondary" data-dismiss="modal"
                                     style="color:white">Cancel</a>
-                                <button type="submit" class="btn btn-success" name="btn_update">Update Record</button>
+                                <input type="submit" id="submit" name="submit"
+                                    class="btn btn-primary col-md-2 col-md-offset-10 update-btn"
+                                    value="Update Record" />
+
                             </div>
                         </form>
                     </div>
@@ -167,7 +172,7 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
 </script>
 
-<script src="jquery.js"></script>
+<script src="jquery-3.6.3.js"></script>
 <script>
 $(document).ready(function() {
 
@@ -177,7 +182,6 @@ $(document).ready(function() {
             url: "http://localhost/MyWork/API_Task/view_api.php",
             type: "GET",
             success: function(data) {
-                //console.log(data);
                 if (data.status == false) {
                     $("#load-data").append("<tr><td colspan = '10'><h2>" + data.message +
                         "</h2></td></tr>"); //incase no row found
@@ -202,7 +206,6 @@ $(document).ready(function() {
                             value.id + "'>Delete Record</a>" +
                             "</td>" +
                             "</tr>");
-
                     });
                 }
             }
@@ -213,16 +216,17 @@ $(document).ready(function() {
 
     /****** 2nd Route....Fetch User Record For Updating ******/
     $(document).on("click", ".edit-btn", function() {
+
         var id = $(this).data("eid");
-        var obj = {id: id};
+        var obj = { id: id };
         var convertJson = JSON.stringify(obj);
-        //console.log(convertJson);
+        console.log(convertJson);
         $.ajax({
             url: "http://localhost/MyWork/API_Task/fetch_singleRecord.php",
             type: "POST",
             data: convertJson,
             success: function(data) {
-                $("#id").val(data[0].id);
+                $("#edit-id").val(data[0].id);
                 $("#title").val(data[0].title);
                 $("#first_name").val(data[0].first_name);
                 $("#last_name").val(data[0].last_name);
@@ -233,10 +237,65 @@ $(document).ready(function() {
                 $("#state").val(data[0].state);
                 $("#zip").val(data[0].zip);
                 $("#textarea").val(data[0].textarea);
-                //console.log(data);
+                console.log(data);
             }
         });
     });
+
+
+    /***** 3rd Route.....Update Records ******/
+    function jsonData(targetForm) {
+        var arr = $(targetForm).serializeArray();
+        var id = $(this).data("eid");
+        var obj = { id: id };
+        for (var i = 0; i < arr.length; i++) {
+            obj[arr[i].name] = arr[i].value;
+        }
+        var json_string = JSON.stringify(obj);
+        return json_string;
+    }
+
+    $("#submit").on("click", function(e) {
+        e.preventDefault();
+        var json_obj = jsonData("#update_form");
+        console.log(json_obj);
+
+        $.ajax({
+            url: "http://localhost/MyWork/API_Task/update_api.php",
+            type: "POST",
+            dataType: "text",
+            data: json_obj,
+            success: function(data) {
+                alert("Record has been Updated.");
+                console.log(data);
+
+            }
+        });
+    });
+
+    /****** 4th Route....Delete User Record ******/
+    $(document).on("click", ".delete-btn", function() {
+        var id = $(this).data("id");
+        var obj = {
+            id: id
+        };
+        var convertJson = JSON.stringify(obj);
+        console.log(convertJson);
+        var row = this;
+
+        $.ajax({
+            url: "http://localhost/MyWork/API_Task/delete_api.php",
+            type: "DELETE",
+            dataType: "text",
+            data: convertJson,
+            success: function(data) {
+                alert("Record has been Deleted.");
+                $(row).closest("tr").fadeOut();
+                console.log(data);
+            }
+        });
+    });
+
 });
 </script>
 

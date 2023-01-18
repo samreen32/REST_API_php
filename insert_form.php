@@ -15,14 +15,14 @@
 </head>
 
 <body>
+<?php require_once('index.php'); ?>
 
     <div class="container">
         <div style="margin-top: 2%;">
-            <h1 style="text-align: center;">Civil Aviation Form</h1>
+            <h1 style="text-align: center;">Personal Information Form</h1>
         </div><br>
         <div>
             <form method="post" id="insert_form" name="insert_form">
-                <h4>Personal Information</h4>
                 <div class="form-row">
                     <div class="form-group col-md-2">
                         <label class="my-1 mr-2" for="title">Title</label>
@@ -106,7 +106,7 @@
                         name="textarea"></textarea>
                 </div>
                 <input type="submit" id="submit" name="submit" class="btn btn-primary col-md-2 col-md-offset-10"
-                    value="Submit Application" />
+                    value="Submit Record" />
             </form>
         </div><br>
 
@@ -128,7 +128,7 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
 </script>
 
-<script src="jquery.js"></script>
+<script src="jquery-3.6.3.js"></script>
 <script>
 $(document).ready(function() {
 
@@ -146,16 +146,21 @@ $(document).ready(function() {
     $("#submit").on("click", function(e) {
         e.preventDefault();
         var json_obj = converting_toJSON("#insert_form");
+        console.log(json_obj);
         $.ajax({
             url: "http://localhost/MyWork/API_Task/insert_api.php",
             type: "POST",
+            dataType: "text",
             data: json_obj,
             success: function(data) {
-                alert("Record Inserted");
-                 console.log(data);
+                alert("Record has been Inserted.");
+                console.log(data);
+                $("#insert_form")[0].reset();
             }
         });
+       
     });
+    
 });
 </script>
 
